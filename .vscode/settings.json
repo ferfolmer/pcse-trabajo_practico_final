@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "api_lcd.h": "c",
+        "api_i2c.h": "c",
+        "api_common.h": "c",
+        "api_common_port.h": "c",
+        "stm32f4xx_hal.h": "c"
+    }
+}
