@@ -1,91 +1,105 @@
 #include "API_debounce.h"
-#include "stm32f4xx_hal.h"
-#include "main.h"
 
-typedef enum{
-    BUTTON_UP,
-    BUTTON_FALLING,
-    BUTTON_DOWN,
-    BUTTON_RAISING,
-} debounceState_t;
+static void Error_Handler(void);
 
-static debounceState_t estado;
-static delay_t delayAntirrebote;
-static const uint32_t debounceTime = 40;
-static bool_t deteccionFlancoDescendente = false;
-static bool_t readButton(void);
 
-/**@brief wrapper de la funcion HAL readPin para portar a nucleo 429 cambiar
- * B1_GPIO_Port -> USER_Btn_GPIO_Port
- * B1_Pin -> USER_Btn_Pin
- */
-static bool_t readButton(void){
-	return HAL_GPIO_ReadPin(USER_Btn_GPIO_Port, USER_Btn_Pin);
+
+
+static const uint32_t debounceTime = 40U;
+
+
+
+void debounceFSM_init(stDebounce *button, gpio_t *pin, delay_t *delay)
+{
+	if (button == NULL || pin == NULL || delay == NULL)
+	{
+		Error_Handler();
+	}
+
+	button->gpio_ = pin;
+	button->delay_ = delay;
+	button->state_ = BUTTON_UP;
+	button->isButtonPressed_ = false;
+
+	delayInit(button->delay_, debounceTime);
+
+	button->isInit = true;	
 }
 
-
-void debounceFSM_init()
+void debounceFSM_update(stDebounce *button)
 {
-	estado = BUTTON_UP;
-	delayInit(&delayAntirrebote, debounceTime); //definir const
-}
+	if (!button->isInit)
+	{
+		Error_Handler();
+	}
+	pin_state_t buttonState = Port_ReadPin(button->gpio_->port, button->gpio_->pin);
 
-void debounceFSM_update()
-{
-	switch (estado) {
+	switch (button->state_) {
 	case BUTTON_UP:
-		if (readButton())
+		if (buttonState == GPIO_PIN_RESET)
 		{
-			delayWrite(&delayAntirrebote, debounceTime);
-			estado = BUTTON_FALLING;
+			delayWrite(button->delay_, debounceTime);
+			button->state_ = BUTTON_FALLING;
 		}
 		break;
 	case BUTTON_FALLING:
-    if (delayRead(&delayAntirrebote))
+    if (delayRead(button->delay_))
     {
-        if (readButton())
+        if (buttonState == GPIO_PIN_RESET)
         {
-            deteccionFlancoDescendente = true;
-            estado = BUTTON_DOWN;
+            button->isButtonPressed_ = true;
+            button->state_ = BUTTON_DOWN;
         }
         else
         {
-            estado = BUTTON_UP;
+            button->state_ = BUTTON_UP;
         }
     }
     break;
 	case BUTTON_DOWN:
-		if (!readButton())
+		if (buttonState == GPIO_PIN_SET)		
 		{
-			delayWrite(&delayAntirrebote, debounceTime);
-			estado = BUTTON_RAISING;
+			delayWrite(button->delay_, debounceTime);
+			button->state_ = BUTTON_RAISING;
 		}
 		break;
 	case BUTTON_RAISING:
-		if (delayRead(&delayAntirrebote))
+		if (delayRead(button->delay_))
 		{
-			if (!readButton())
+			if (buttonState == GPIO_PIN_SET)
 			{
-				estado = BUTTON_UP;
+				button->state_ = BUTTON_UP;
 			}
 			else
 			{
-				estado = BUTTON_DOWN;
+				button->state_ = BUTTON_DOWN;
 			}
 		}
 		break;
 	default :
-		debounceFSM_init();
+		debounceFSM_init(button, button->gpio_, button->delay_);
 		break;
 	}
 }
 
-bool_t readKey()
+bool_t debounceFSM_readKey(stDebounce *button)
 {
-    bool_t ret = deteccionFlancoDescendente;
-    deteccionFlancoDescendente = false;
+    bool_t ret = button->isButtonPressed_;
+    button->isButtonPressed_ = false;
     return ret; 
 }
 
+debounceState_t debounceFSM_getState(stDebounce *button)
+{
+	return button->state_;
+}
+
+
+static void Error_Handler(void)
+{
+	while (1)
+	{
+	}
+}
 
     

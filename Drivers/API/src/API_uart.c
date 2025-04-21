@@ -5,12 +5,17 @@
 
 #define UART_INSTANCE USART3
 #define UART_BAUDRATE 115200
+#define UART_TIMEOUT 100
 
 static UART_HandleTypeDef huart_;
 static const char *uartInitMessage = "UART Initialized with config 8N1\r\n";
 
 
-
+/**
+ * @brief inicializa la instancia utilizada para la comunicacion serie
+ * 
+ * @return bool_t true si la inicializacion fue exitosa, false en caso contrario
+ */
 bool_t uartInit() {
     bool_t ret = false;
     huart_.Instance = UART_INSTANCE;
@@ -31,14 +36,31 @@ bool_t uartInit() {
     return ret;
 }
 
+/**
+ * @brief Envia una cadena de caracteres por UART
+ * 
+ * @param pstring puntero a la cadena de caracteres a enviar
+ */
 void uartSendString(uint8_t * pstring) {
-    HAL_UART_Transmit(&huart_, pstring, strlen((char *)pstring), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart_, pstring, strlen((char *)pstring), UART_TIMEOUT);
 }
 
+/**
+ * @brief Envia una cadena de caracteres de tamaño fijo por UART
+ * 
+ * @param pstring puntero a la cadena de caracteres a enviar
+ * @param size tamaño de la cadena a enviar
+ */
 void uartSendStringSize(uint8_t * pstring, uint16_t size) {
-    HAL_UART_Transmit(&huart_, pstring, size, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart_, pstring, size, UART_TIMEOUT);
 }
 
+/**
+ * @brief Recibe una cadena de caracteres de tamaño fijo por UART
+ * 
+ * @param pstring puntero a la cadena de caracteres a recibir
+ * @param size tamaño de la cadena a recibir
+ */
 void uartReceiveStringSize(uint8_t * pstring, uint16_t size) {
-    HAL_UART_Receive(&huart_, pstring, size, HAL_MAX_DELAY);
+    HAL_UART_Receive(&huart_, pstring, size, UART_TIMEOUT);
 }

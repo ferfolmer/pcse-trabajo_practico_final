@@ -61,8 +61,8 @@ all: main-build
 main-build: tp_pcse.elf secondary-outputs
 
 # Tool invocations
-tp_pcse.elf tp_pcse.map: $(OBJS) $(USER_OBJS) /home/ferfolmer/cese/pcse/trabajo-practico-final/STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "tp_pcse.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/ferfolmer/cese/pcse/trabajo-practico-final/STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tp_pcse.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+tp_pcse.elf tp_pcse.map: $(OBJS) $(USER_OBJS) /home/ferfolmer/cese/pcse/pcse-trabajo_practico_final/STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "tp_pcse.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/ferfolmer/cese/pcse/pcse-trabajo_practico_final/STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tp_pcse.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

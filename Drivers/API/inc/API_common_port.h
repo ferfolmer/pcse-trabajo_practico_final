@@ -1,16 +1,5 @@
-/**
- * @file API_common_port.h
- * @author Iván Podoroska
- * @brief 
- * @version 0.1
- * @date 2024-04-15
- * 
- * @copyright Copyright (c) 2024
- * 
- */
-
-#ifndef COMMON_PORT_H
-#define COMMON_PORT_H
+#ifndef API_COMMON_PORT_H
+#define API_COMMON_PORT_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -20,5 +9,8 @@
 typedef GPIO_PinState   pin_state_t;
 typedef uint16_t        pin_t;
 typedef GPIO_TypeDef    *port_t;
+
+void Port_Delay(uint32_t delayTime);
+pin_state_t Port_ReadPin(port_t GPIOx, pin_t GPIO_Pin);
 
 #endif

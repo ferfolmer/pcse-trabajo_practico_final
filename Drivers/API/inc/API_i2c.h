@@ -3,9 +3,6 @@
 
 #include "API_common.h"
 
-#define I2C_CLOCK_RATE 100000
-#define I2C_TIMEOUT 1000
-
 typedef enum {
     I2C_OK = 0,
     I2C_ERROR,         

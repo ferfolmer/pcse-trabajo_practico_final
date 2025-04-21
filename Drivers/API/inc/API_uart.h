@@ -1,8 +1,6 @@
 #ifndef API_UART_H
 #define API_UART_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "API_delay.h"
 
 bool_t uartInit();

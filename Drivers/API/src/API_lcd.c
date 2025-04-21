@@ -1,5 +1,5 @@
 #include "API_lcd.h"
-#include <string.h>
+#include "API_i2c.h"
 
 //-----------------------------------------------------------------------------
 // Definiciones internas para manejo de bits de control
@@ -9,6 +9,11 @@
 #define LCD_PIN_EN               (1U << 2)     /* P2 */
 #define LCD_PIN_BACKLIGHT        (1U << 3)     /* P3 */
 
+#define LCD_I2C_ADDRESS          (0x27 << 1)
+
+#define LCD_INIT_CMD_1           (0x03)
+#define LCD_INIT_CMD_2           (0x02)
+
 
 // En algunos módulos, los 4 bits de datos se ubican en la parte alta del byte,
 // pero puede variar. Ajusta si no funciona con tu hardware.
@@ -16,7 +21,6 @@
 //-----------------------------------------------------------------------------
 // Variables estáticas
 //-----------------------------------------------------------------------------
-static I2C_HandleTypeDef *g_lcdI2c = NULL;  // Handle I2C usado por el LCD
 static const uint8_t LCD_INIT_CMD[] = {
 	MODE_4BIT,
 	DISPLAY_CONTROL,
@@ -31,7 +35,7 @@ static uint8_t lcd_bl_mask = LCD_PIN_BACKLIGHT;
 static void LCD_Send4Bits(uint8_t nibble, uint8_t control);
 static void LCD_SendCmd(uint8_t cmd);
 static void LCD_SendData(uint8_t data);
-static void LCD_WriteI2C(uint8_t dato);
+static void LCD_WriteI2C(uint8_t dato, uint16_t len);
 static void LCD_Delay(uint32_t ms);
 static inline void LCD_DelayUs(uint16_t us)
 {
@@ -41,17 +45,16 @@ static inline void LCD_DelayUs(uint16_t us)
 }
 
 
-//-----------------------------------------------------------------------------
-// Implementación de las funciones públicas
-//-----------------------------------------------------------------------------
-LCD_Status_t LCD_Init(I2C_HandleTypeDef *hi2c)
+LCD_Status_t LCD_Init(void)
 {
     LCD_Status_t status = LCD_ERROR;
-    if (hi2c == NULL)
+    if (I2C_isInit() != I2C_OK)
     {
-        return status;
+        if (I2C_Init() != I2C_OK)
+        {
+            return status;  // Error: I2C no inicializado
+        }
     }
-    g_lcdI2c = hi2c;
 
     LCD_Delay(DELAY_20MS);
 
@@ -60,12 +63,12 @@ LCD_Status_t LCD_Init(I2C_HandleTypeDef *hi2c)
     // - Enviar 0x03 (nibble alto 0x3) tres veces con retardos
     // - Finalmente, enviar 0x02 (para 4-bit mode)
     // -------------------------------------------------------
-    LCD_Send4Bits(0x03, 0);  
+    LCD_Send4Bits(LCD_INIT_CMD_1, LCD_CONTROL);  
     LCD_Delay(DELAY_10MS);
-    LCD_Send4Bits(0x03, 0);
+    LCD_Send4Bits(LCD_INIT_CMD_1, LCD_CONTROL);
     LCD_Delay(DELAY_1MS);
-    LCD_Send4Bits(0x03, 0);
-    LCD_Send4Bits(0x02, 0);  // Activar modo 4 bits
+    LCD_Send4Bits(LCD_INIT_CMD_1, LCD_CONTROL);
+    LCD_Send4Bits(LCD_INIT_CMD_2, LCD_CONTROL);  // Activar modo 4 bits
 
     for (uint8_t i = 0; i < sizeof(LCD_INIT_CMD); i++) {
         LCD_SendCmd(LCD_INIT_CMD[i]);
@@ -73,7 +76,6 @@ LCD_Status_t LCD_Init(I2C_HandleTypeDef *hi2c)
         if (LCD_INIT_CMD[i] == CLR_LCD || LCD_INIT_CMD[i] == RETURN_HOME)
             LCD_Delay(DELAY_2MS);
     }
-
 
     status = LCD_OK;
     return status;
@@ -132,9 +134,9 @@ static void LCD_Send4Bits(uint8_t value, uint8_t control)
     if (control) byte |= LCD_PIN_RS;
 
     byte |= lcd_bl_mask;  // Agrega el bit de retroiluminación
-    LCD_WriteI2C(byte | LCD_PIN_EN);
+    LCD_WriteI2C(byte | LCD_PIN_EN, sizeof(byte));
     LCD_Delay(DELAY_1MS);
-	LCD_WriteI2C(byte & ~LCD_PIN_EN);
+	LCD_WriteI2C(byte & ~LCD_PIN_EN, sizeof(byte));
     LCD_Delay(DELAY_1MS);
 }
 
@@ -149,7 +151,7 @@ static void LCD_Send8Bits(uint8_t value, uint8_t control)
  */
 static void LCD_SendCmd(uint8_t cmd)
 {
-    LCD_Send8Bits(cmd, CONTROL);
+    LCD_Send8Bits(cmd, LCD_CONTROL);
 }
 
 /**
@@ -157,16 +159,16 @@ static void LCD_SendCmd(uint8_t cmd)
  */
 static void LCD_SendData(uint8_t data)
 {
-    LCD_Send8Bits(data, DATA);
+    LCD_Send8Bits(data, LCD_DATA);
 }
 
 /**
  * @brief Escribe un byte a través de I2C hacia el PCF8574.
  */
-static void LCD_WriteI2C(uint8_t dato)
+static void LCD_WriteI2C(uint8_t dato, uint16_t len)
 {
     // Transmite un byte al dispositivo en la dirección LCD_I2C_ADDRESS
-    HAL_I2C_Master_Transmit(g_lcdI2c, LCD_I2C_ADDRESS, &dato, 1, 100);
+    I2C_Send(LCD_I2C_ADDRESS, &dato, len);
     // Se asume que no hay error de timeout. Podrías evaluar el retorno si deseas.
 }
 
