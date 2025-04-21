@@ -1,5 +1,0 @@
-../Drivers/API/src/API_encoder.c:43:18:Encoder_Init	1
-../Drivers/API/src/API_encoder.c:66:6:Encoder_Update	7
-../Drivers/API/src/API_encoder.c:98:21:Encoder_GetDirection	3
-../Drivers/API/src/API_encoder.c:110:8:Encoder_IsPressed	1
-../Drivers/API/src/API_encoder.c:117:13:Encoder_GPIO_Init	1

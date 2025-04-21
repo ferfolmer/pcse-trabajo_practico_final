@@ -1,2 +1,0 @@
-../Drivers/API/src/API_common_port.c:3:6:Port_Delay	1
-../Drivers/API/src/API_common_port.c:8:13:Port_ReadPin	1

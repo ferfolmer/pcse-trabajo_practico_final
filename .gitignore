@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+.metadata
+.settings
+[Rr]elease/
+[Dd]ebug/
+build/
+dist/
+tmp/
+out/
+.cache/
+.idea/
+.vscode/
+node_modules/

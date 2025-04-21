@@ -21,7 +21,9 @@ typedef enum {
 typedef struct {
     gpio_t clk_, dt_, sw_;
     Encoder_State_t state_;
+    Encoder_State_t prevState_;
     Encoder_Direction_t direction_;
+    bool_t taken_;
 } stEncoder;
 
 static bool_t isInit_ = false;
@@ -36,7 +38,6 @@ static gpio_t clkGpio_ = { .port = ENCODER_CLK_GPIO_Port, .pin = ENCODER_CLK_Pin
 static gpio_t dtGpio_  = { .port = ENCODER_DT_GPIO_Port,  .pin = ENCODER_DT_Pin  };
 static gpio_t swGpio_  = { .port = ENCODER_SW_GPIO_Port,  .pin = ENCODER_SW_Pin  };
 static bool_t buttonPressed = false;
-static bool_t prevClkState = false;
 
 static void Encoder_GPIO_Init(void);
 
@@ -52,12 +53,34 @@ Encoder_Status_t Encoder_Init(void)
     debounceFSM_init(&dtDebounce_, &encoder_.dt_, &dtDelay_);
     debounceFSM_init(&swDebounce_, &encoder_.sw_, &swDelay_);
 
-    debounceState_t s = debounceFSM_getState(&clkDebounce_);
-    prevClkState = (s == BUTTON_UP);
+    encoder_.prevState_ = ENCODER_STATE_11;
 
-
-
-    encoder_.direction_ = ENCODER_DIR_NONE;
+    if (Port_ReadPin(encoder_.clk_.port, encoder_.clk_.pin) == GPIO_PIN_SET)
+    {
+        if (Port_ReadPin(encoder_.dt_.port, encoder_.dt_.pin) == GPIO_PIN_RESET)
+        {
+            encoder_.state_ = ENCODER_STATE_11;
+        }
+        else
+        {
+            encoder_.state_ = ENCODER_STATE_01;
+        }        
+    }
+    else
+    {
+        if (Port_ReadPin(encoder_.dt_.port, encoder_.dt_.pin) == GPIO_PIN_SET)
+        {
+            encoder_.state_ = ENCODER_STATE_10;
+        }
+        else
+        {
+            encoder_.state_ = ENCODER_STATE_00;
+            encoder_.prevState_ = ENCODER_STATE_00;
+        }
+    }
+    
+    encoder_.direction_ = ENCODER_CW;
+    encoder_.taken_ = true;
     buttonPressed = false;
     isInit_ = true;
     return ENCODER_OK;
@@ -74,20 +97,80 @@ void Encoder_Update(void)
     debounceState_t clkS = debounceFSM_getState(&clkDebounce_);
     debounceState_t dtS  = debounceFSM_getState(&dtDebounce_);
 
-    bool clkStableUp   = (clkS == BUTTON_UP);
-    bool clkStableDown = (clkS == BUTTON_DOWN);
-    bool dtStableUp    = (dtS  == BUTTON_UP);
-
-    /* flanco 0→1 sólo si ambos prev y new fueron ESTABLES */
-    if (prevClkState == false && clkStableUp)
+    switch (encoder_.state_)
     {
-        encoder_.direction_ = dtStableUp ? ENCODER_CCW : ENCODER_CW;
-    }
+    case ENCODER_STATE_00:
+        if(dtS == BUTTON_UP)
+        {
+            encoder_.state_ = ENCODER_STATE_10;
+        }
+        else if (clkS == BUTTON_UP)
+        {
+            encoder_.state_ = ENCODER_STATE_01;
+        }        
+        break;
 
-    /* actualizamos prev sólo si está en un estado estable */
-    if (clkStableUp || clkStableDown)
-    {
-        prevClkState = clkStableUp;
+    case ENCODER_STATE_01:
+        if (dtS == BUTTON_UP)
+        {
+            encoder_.state_ = ENCODER_STATE_11;
+            if (encoder_.prevState_ == ENCODER_STATE_00)
+            {
+                encoder_.prevState_ = ENCODER_STATE_11;
+                encoder_.direction_ = ENCODER_CW;
+                encoder_.taken_ = false;
+            }            
+        }
+        else if (clkS == BUTTON_DOWN)
+        {
+            encoder_.state_ = ENCODER_STATE_00;
+            if (encoder_.prevState_ == ENCODER_STATE_11)
+            {
+                encoder_.prevState_ = ENCODER_STATE_00;
+                encoder_.direction_ = ENCODER_CCW;
+                encoder_.taken_ = false;
+            }            
+        }
+        break;
+
+    case ENCODER_STATE_11:
+        if (dtS == BUTTON_DOWN)
+        {
+            encoder_.state_ = ENCODER_STATE_01;
+        }
+        else if (clkS == BUTTON_DOWN)
+        {
+            encoder_.state_ = ENCODER_STATE_10;
+        }
+        break;
+   
+    case ENCODER_STATE_10:
+        if (dtS == BUTTON_DOWN)
+        {
+            encoder_.state_ = ENCODER_STATE_00;
+            if (encoder_.prevState_ == ENCODER_STATE_11)
+            {
+                encoder_.prevState_ = ENCODER_STATE_00;
+                encoder_.direction_ = ENCODER_CW;
+                encoder_.taken_ = false;
+            }
+        }
+        else if (clkS == BUTTON_UP)
+        {
+            encoder_.state_ = ENCODER_STATE_11;
+            if (encoder_.prevState_ == ENCODER_STATE_00)
+            {
+                encoder_.prevState_ = ENCODER_STATE_11;
+                encoder_.direction_ = ENCODER_CCW;
+                encoder_.taken_ = false;
+            }
+        }
+        break;
+        
+    
+    default:
+        Encoder_Init();
+        break;
     }
 
     if (debounceFSM_readKey(&swDebounce_))
@@ -97,13 +180,14 @@ void Encoder_Update(void)
 
 Encoder_Direction_t Encoder_GetDirection(void)
 {
-    Encoder_Direction_t d = encoder_.direction_;
-    if (d == ENCODER_CW)
-        uartSendString((uint8_t *)"Encoder dir: CW\r\n");
-    else if (d == ENCODER_CCW)
-        uartSendString((uint8_t *)"Encoder dir: CCW\r\n");
-    else
-    encoder_.direction_ = ENCODER_DIR_NONE;
+    Encoder_Direction_t d = ENCODER_DIR_NONE;
+
+    if (!encoder_.taken_)
+    {
+        encoder_.taken_ = true;
+        d = encoder_.direction_;
+    }
+    
     return d;
 }
 

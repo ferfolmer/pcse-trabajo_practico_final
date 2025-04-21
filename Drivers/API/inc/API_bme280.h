@@ -11,15 +11,15 @@ typedef enum {
 } BME280_Status_t;
 
 typedef struct {
-    int32_t temperature_x100;
-    uint32_t pressure;
-    uint32_t humidity_x1024;
+    int32_t temperature_x100;   //centecimas de grado
+    uint32_t pressure;          //Pa
+    uint32_t humidity_x1024;    //humedad / 1024
 } BME280_Data_t;
 
 typedef struct {
-    int32_t tempOffset;
-    int32_t pressOffset;
-    int32_t humOffset;
+    int32_t temperatureOff_x100;
+    int32_t pressureOff;
+    int32_t humidityOff_x1024;
 } BME280_Offsets_t;
 
 typedef struct {
@@ -52,5 +52,7 @@ typedef struct {
 BME280_Status_t BME280_Init(void);
 
 BME280_Status_t BME280_ReadData(BME280_Data_t *data);
+
+void BME280_ReadCorrected(BME280_t *b);
 
 #endif // API_BME280_H

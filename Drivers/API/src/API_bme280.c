@@ -109,6 +109,7 @@ BME280_Status_t BME280_ReadData(BME280_Data_t *out)
     out->temperature_x100 = compensate_temp(adc_T);
     out->pressure	      = compensate_press(adc_P);
     out->humidity_x1024   = compensate_hum(adc_H);
+
     
     return BME280_OK;
 }
