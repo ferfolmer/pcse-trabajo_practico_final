@@ -70,19 +70,19 @@ void Menu_Update(void)
             LCD_SetCursor(0, 0);
             LCD_Print("BME280 Init OK");
             uartSendString((uint8_t *)"BME280 Init OK\r\n");
-            menu_.state_ = STATE_DISPLAY_DATA;
+            menu_.state_ = STATE_DISPLAY_DATA_TOP;
             stateEntry = true;
         }
         break;
 
-    case STATE_DISPLAY_DATA:
+    case STATE_DISPLAY_DATA_TOP:
         if (stateEntry)
         {
             BME280_ReadCorrected(&sensor_);
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
             updateDisplayData(&sensor_.data);
-            delayWrite(&dataDelay_, MENU_DATA_UPDATE_TIME);
+            // delayWrite(&dataDelay_, MENU_DATA_UPDATE_TIME);
             stateEntry = false;
         }
         
@@ -94,12 +94,35 @@ void Menu_Update(void)
             delayWrite(&dataDelay_, MENU_DATA_UPDATE_TIME);
         }
 
-        if (dir == ENCODER_CW)       
+        if (btnPressed)
+        {
+            menu_.state_ = STATE_DISPLAY_DATA;
+            stateEntry = true;
+        }
+        break;
+
+    case STATE_DISPLAY_DATA:
+        if (stateEntry)
+        {
+            LCD_Clear();
+            LCD_SetCursor(LINE_1, 0);
+            LCD_Print("Datos BME280");
+            uartSendString((uint8_t *)"ENTRO EN DISPLAY DATA\r\n");
+            stateEntry = false;
+        }
+        
+        if (btnPressed)
+        {
+            menu_.state_ = STATE_DISPLAY_DATA_TOP;
+            stateEntry = true;
+        }
+
+        if (dir == ENCODER_CW)
         {
             menu_.state_ = STATE_CALIBRATION;
             stateEntry = true;
         }
-
+        
         if (dir == ENCODER_CCW)
         {
             menu_.state_ = STATE_RESET_CALIBRATION;
@@ -112,7 +135,7 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print(" Calibracion >");
+            LCD_Print("Calibracion ");
             uartSendString((uint8_t *)"ENTRO EN CALIBRACION\r\n");
             stateEntry = false;
         }
@@ -141,14 +164,14 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("  Reset calibr ");
+            LCD_Print("Reset calibr ");
             uartSendString((uint8_t *)"ENTRO EN RESET CALIB \r\n");
             stateEntry = false;
         }
 
         if (btnPressed)
         {
-            menu_.state_ = STATE_DISPLAY_DATA;
+            menu_.state_ = STATE_DISPLAY_DATA_TOP;
             sensor_.offsets.humidityOff_x1024 = 0U;
             sensor_.offsets.pressureOff = 0U;
             sensor_.offsets.temperatureOff_x100 = 0U;
@@ -276,7 +299,7 @@ void Menu_Update(void)
 
         if (btnPressed)
         {
-            menu_.state_ = STATE_DISPLAY_DATA;
+            menu_.state_ = STATE_DISPLAY_DATA_TOP;
             sensor_.offsets.temperatureOff_x100 = offset_;
             uartSendString((uint8_t *)"OFFSET TEMP ACTUALIZADO");
             stateEntry = true;
@@ -310,7 +333,7 @@ void Menu_Update(void)
 
         if (btnPressed)
         {
-            menu_.state_ = STATE_DISPLAY_DATA;
+            menu_.state_ = STATE_DISPLAY_DATA_TOP;
             sensor_.offsets.pressureOff = offset_;
             stateEntry = true;
         }
@@ -343,7 +366,7 @@ void Menu_Update(void)
         
         if (btnPressed)
         {
-            menu_.state_ = STATE_DISPLAY_DATA;
+            menu_.state_ = STATE_DISPLAY_DATA_TOP;
             sensor_.offsets.humidityOff_x1024 = offset_;
             stateEntry = true;
         }
