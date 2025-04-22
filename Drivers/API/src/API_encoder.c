@@ -1,5 +1,6 @@
 #include "API_encoder.h"
 #include "API_uart.h"
+#include "port.h"
 #include "stm32f4xx_hal.h"
 
 #define ENCODER_CLK_GPIO_Port   GPIOC
@@ -39,11 +40,9 @@ static gpio_t dtGpio_  = { .port = ENCODER_DT_GPIO_Port,  .pin = ENCODER_DT_Pin 
 static gpio_t swGpio_  = { .port = ENCODER_SW_GPIO_Port,  .pin = ENCODER_SW_Pin  };
 static bool_t buttonPressed = false;
 
-static void Encoder_GPIO_Init(void);
-
 Encoder_Status_t Encoder_Init(void)
 {
-    Encoder_GPIO_Init();
+    if (Port_Encoder_InitPins(ENCODER_CLK_GPIO_Port, ENCODER_CLK_Pin, ENCODER_DT_GPIO_Port, ENCODER_DT_Pin, ENCODER_SW_GPIO_Port, ENCODER_SW_Pin));
 
     encoder_.clk_ = clkGpio_;
     encoder_.dt_ = dtGpio_;
@@ -196,16 +195,4 @@ bool_t Encoder_IsPressed(void)
     bool_t p = buttonPressed;
     buttonPressed = false;
     return p;
-}
-
-static void Encoder_GPIO_Init(void)
-{
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-
-    GPIO_InitStruct.Pin   = ENCODER_CLK_Pin | ENCODER_DT_Pin | ENCODER_SW_Pin;
-    GPIO_InitStruct.Mode  = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull  = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 }

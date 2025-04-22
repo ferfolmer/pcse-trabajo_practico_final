@@ -37,13 +37,6 @@ static void LCD_SendCmd(uint8_t cmd);
 static void LCD_SendData(uint8_t data);
 static void LCD_WriteI2C(uint8_t dato, uint16_t len);
 static void LCD_Delay(uint32_t ms);
-static inline void LCD_DelayUs(uint16_t us)
-{
-    uint32_t start = DWT->CYCCNT;
-    uint32_t ticks = (HAL_RCC_GetHCLKFreq() / 1e6) * us;
-    while (DWT->CYCCNT - start < ticks) { __NOP(); }
-}
-
 
 LCD_Status_t LCD_Init(void)
 {
@@ -167,9 +160,7 @@ static void LCD_SendData(uint8_t data)
  */
 static void LCD_WriteI2C(uint8_t dato, uint16_t len)
 {
-    // Transmite un byte al dispositivo en la dirección LCD_I2C_ADDRESS
     I2C_Send(LCD_I2C_ADDRESS, &dato, len);
-    // Se asume que no hay error de timeout. Podrías evaluar el retorno si deseas.
 }
 
 /**
@@ -177,5 +168,5 @@ static void LCD_WriteI2C(uint8_t dato, uint16_t len)
  */
 static void LCD_Delay(uint32_t ms)
 {
-    HAL_Delay(ms);
+    Port_Delay(ms);
 }
