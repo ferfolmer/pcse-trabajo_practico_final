@@ -1,6 +1,6 @@
-#include "API_debounce.h"
 #include "port.h"
 #include "port_gpio.h"
+#include "API_debounce.h"
 
 static void Error_Handler(void);
 

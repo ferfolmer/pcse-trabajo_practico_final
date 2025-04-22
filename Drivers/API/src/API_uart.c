@@ -1,4 +1,3 @@
-#include <string.h>
 #include "API_uart.h"
 #include "port.h"
 

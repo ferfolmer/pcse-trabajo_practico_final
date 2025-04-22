@@ -1,4 +1,3 @@
-#include "API_common.h"
 #include "menu.h"
 #include "API_delay.h"
 #include "API_lcd.h"
