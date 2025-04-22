@@ -1,9 +1,9 @@
-#include "API_i2c.h"
 #include "port.h"
+#include "API_i2c.h"
 
 static bool_t isInit_ = false;
 
-static void Error_Handler(void);
+//static void Error_Handler(void);
 
 
 /**
@@ -63,8 +63,8 @@ I2C_Status_t I2C_isInit(void)
  * @brief Error handler function that is called when an invalid operation occurs
  * 
  */
-static void Error_Handler(void)
-{
-    while(1)
-    {}
-}
+//static void Error_Handler(void)
+//{
+//    while(1)
+//    {}
+//}

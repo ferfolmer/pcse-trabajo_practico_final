@@ -1,7 +1,8 @@
 #ifndef PORT_H
 #define PORT_H
 
-#include "API_common.h"
+#include "port_types.h"
+#include "port_gpio.h"
 
 typedef enum {
     PORT_OK = 0,
@@ -23,5 +24,8 @@ PortStatus_t Port_Encoder_InitPins(GPIO_TypeDef *clkPort,uint16_t clkPin,
 								   GPIO_TypeDef *dtPort	,uint16_t dtPin	,
 								   GPIO_TypeDef *swPort	,uint16_t swPin );
 
+
+uint32_t Port_GetTick(void);
+void Port_Delay(uint32_t delayTime);
 
 #endif

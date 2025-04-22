@@ -60,6 +60,5 @@ void uartSendStringSize(uint8_t * pstring, uint16_t size) {
  * @param size tamaño de la cadena a recibir
  */
 void uartReceiveStringSize(uint8_t * pstring, uint16_t size) {
-//    HAL_UART_Receive(&huart_, pstring, size, UART_TIMEOUT);
 	if (isInit_) Port_UART_Receive(pstring, size);
 }

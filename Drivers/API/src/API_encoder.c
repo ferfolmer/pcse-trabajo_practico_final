@@ -1,7 +1,6 @@
-#include "API_encoder.h"
-#include "API_uart.h"
 #include "port.h"
-#include "stm32f4xx_hal.h"
+#include "port_gpio.h"
+#include "API_encoder.h"
 
 #define ENCODER_CLK_GPIO_Port   GPIOC
 #define ENCODER_CLK_Pin         GPIO_PIN_10

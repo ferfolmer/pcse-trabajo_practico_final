@@ -1,12 +1,12 @@
+#include "port.h"
 #include "API_delay.h"
-#include "stm32f4xx_hal.h"
 
 void delayInit(delay_t * delay, tick_t duration)
 {
 	if (delay != NULL) {
 		delay->duration = duration;
 		delay->running = false;
-		delay->startTime = HAL_GetTick();
+		delay->startTime = Port_GetTick();
 	}
 }
 
@@ -21,7 +21,7 @@ bool_t delayRead(delay_t * delay)
 	{
 		delay->running = true;
 		return ret;
-	} else if ((HAL_GetTick() - delay->startTime) >= delay->duration)
+	} else if ((Port_GetTick() - delay->startTime) >= delay->duration)
 		{
 		delay->running = false;
 		ret = true;
@@ -33,7 +33,7 @@ void delayWrite(delay_t * delay, tick_t duration)
 {
 	if (delay != NULL) {
 		delay->duration = duration;
-		delay->startTime = HAL_GetTick();
+		delay->startTime = Port_GetTick();
 	}
 }
 

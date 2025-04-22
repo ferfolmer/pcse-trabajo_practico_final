@@ -110,3 +110,13 @@ PortStatus_t Port_Encoder_InitPins(GPIO_TypeDef *clkPort,uint16_t clkPin,
     return PORT_OK;}
 
 
+uint32_t Port_GetTick(void)
+{
+    return HAL_GetTick();
+}
+
+void Port_Delay(uint32_t delayTime)
+{
+    HAL_Delay(delayTime);
+}
+

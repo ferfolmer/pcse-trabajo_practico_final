@@ -1,3 +1,4 @@
+#include "port.h"
 #include "API_lcd.h"
 #include "API_i2c.h"
 
@@ -164,7 +165,7 @@ static void LCD_WriteI2C(uint8_t dato, uint16_t len)
 }
 
 /**
- * @brief Delay sencillo que reusa HAL_Delay (milisegundos).
+ * @brief Delay sencillo que reusa Port_Delay (milisegundos).
  */
 static void LCD_Delay(uint32_t ms)
 {

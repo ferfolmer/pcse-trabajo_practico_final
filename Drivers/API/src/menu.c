@@ -1,9 +1,37 @@
+#include "API_common.h"
 #include "menu.h"
 #include "API_delay.h"
 #include "API_lcd.h"
 #include "API_bme280.h"
 #include "API_uart.h"
 
+#define MENU_LCD_STR_INIT   "BME280 Init OK"
+#define MENU_LCD_STR_DATA   "Datos BME280"
+#define MENU_LCD_STR_CALIB  "Calibracion "
+#define MENU_LCD_STR_RESET  "Reset calibr "
+#define MENU_LCD_STR_TEMP   " Calib Tempera>"
+#define MENU_LCD_STR_PRESS  "<Calib Presion>"
+#define MENU_LCD_STR_HUM    "<Calib Humedad>"
+#define MENU_LCD_STR_EXIT   "< Salir"
+#define MENU_LCD_STR_OFFSET_TEMP   "Offset Temp   "
+#define MENU_LCD_STR_OFFSET_PRESS  "Offset Presion "
+#define MENU_LCD_STR_OFFSET_HUM    "Offset Humedad "
+
+#define MENU_UART_STR_INIT                  (uint8_t *)"BME280 Init OK\r\n"
+#define MENU_UART_STR_DATA_TOP              (uint8_t *)"Polling sensor\r\n"
+#define MENU_UART_STR_DATA                  (uint8_t *)"ENTRO EN MOSTRAR DATOS\r\n"
+#define MENU_UART_STR_CALIB                 (uint8_t *)"ENTRO EN CALIBRACION\r\n"
+#define MENU_UART_STR_RESET                 (uint8_t *)"ENTRO EN RESET CALIB \r\n"
+#define MENU_UART_STR_TEMP                  (uint8_t *)"ENTRO EN CALIBRACION TEMP\r\n"
+#define MENU_UART_STR_PRESS                 (uint8_t *)"ENTRO EN CALIBRACION PRES\r\n"
+#define MENU_UART_STR_HUM                   (uint8_t *)"ENTRO EN CALIBRACION HUM\r\n"
+#define MENU_UART_STR_OFFSET_TEMP           (uint8_t *)"ENTRO EN OFFSET TEMP\r\n"
+#define MENU_UART_STR_OFFSET_PRESS          (uint8_t *)"ENTRO EN OFFSET PRES\r\n"
+#define MENU_UART_STR_OFFSET_HUM            (uint8_t *)"ENTRO EN OFFSET HUM\r\n"
+#define MENU_UART_STR_EXIT                  (uint8_t *)"ENTRO EN SALIR\r\n"
+#define MENU_UART_STR_SET_TEMP_OFFSET_OK    (uint8_t *)"OFFSET TEMP ACTUALIZADO\r\n"
+#define MENU_UART_STR_SET_PRESS_OFFSET_OK   (uint8_t *)"OFFSET PRES ACTUALIZADO\r\n"
+#define MENU_UART_STR_SET_HUM_OFFSET_OK     (uint8_t *)"OFFSET HUM ACTUALIZADO\r\n"
 
 #define LINE_1 0
 #define LINE_2 1
@@ -68,8 +96,8 @@ void Menu_Update(void)
     case STATE_INIT:
         {
             LCD_SetCursor(0, 0);
-            LCD_Print("BME280 Init OK");
-            uartSendString((uint8_t *)"BME280 Init OK\r\n");
+            LCD_Print(MENU_LCD_STR_INIT);
+            uartSendString(MENU_UART_STR_INIT);
             menu_.state_ = STATE_DISPLAY_DATA_TOP;
             stateEntry = true;
         }
@@ -90,7 +118,7 @@ void Menu_Update(void)
         {
             BME280_ReadCorrected(&sensor_);
             updateDisplayData(&sensor_.data);
-            uartSendString((uint8_t *)"Polling sensor\r\n");
+            uartSendString(MENU_UART_STR_DATA_TOP);
             delayWrite(&dataDelay_, MENU_DATA_UPDATE_TIME);
         }
 
@@ -106,8 +134,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("Datos BME280");
-            uartSendString((uint8_t *)"ENTRO EN DISPLAY DATA\r\n");
+            LCD_Print(MENU_LCD_STR_DATA);
+            uartSendString(MENU_UART_STR_DATA);
             stateEntry = false;
         }
         
@@ -135,8 +163,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("Calibracion ");
-            uartSendString((uint8_t *)"ENTRO EN CALIBRACION\r\n");
+            LCD_Print(MENU_LCD_STR_CALIB);
+            uartSendString(MENU_UART_STR_CALIB);
             stateEntry = false;
         }
         
@@ -164,8 +192,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("Reset calibr ");
-            uartSendString((uint8_t *)"ENTRO EN RESET CALIB \r\n");
+            LCD_Print(MENU_LCD_STR_RESET);
+            uartSendString(MENU_UART_STR_RESET);
             stateEntry = false;
         }
 
@@ -198,8 +226,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print(" Calib Tempera>");
-            uartSendString((uint8_t *)"ENTRO EN CALIBRACION TEMP\r\n");
+            LCD_Print(MENU_LCD_STR_TEMP);
+            uartSendString(MENU_UART_STR_TEMP);
             stateEntry = false;
         }
         
@@ -221,8 +249,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("<Calib Presion>");
-            uartSendString((uint8_t *)"ENTRO EN CALIBRACION PRES\r\n");
+            LCD_Print(MENU_LCD_STR_PRESS);
+            uartSendString(MENU_UART_STR_PRESS);
             stateEntry = false;
         }
         
@@ -249,8 +277,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("<Calib Humedad>");
-            uartSendString((uint8_t *)"ENTRO EN CALIBRACION HUM\r\n");
+            LCD_Print(MENU_LCD_STR_HUM);
+            uartSendString(MENU_UART_STR_HUM);
             stateEntry = false;
         }
         
@@ -277,10 +305,10 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("Offset Temperat");
+            LCD_Print(MENU_LCD_STR_OFFSET_TEMP);
             offset_ = sensor_.offsets.temperatureOff_x100;
             updateOffsetSelect(offset_, menu_.state_);
-            uartSendString((uint8_t *)"ENTRO EN OFFSET TEMP\r\n");
+            uartSendString(MENU_UART_STR_OFFSET_TEMP);
             stateEntry = false;
         }
         
@@ -301,7 +329,7 @@ void Menu_Update(void)
         {
             menu_.state_ = STATE_DISPLAY_DATA_TOP;
             sensor_.offsets.temperatureOff_x100 = offset_;
-            uartSendString((uint8_t *)"OFFSET TEMP ACTUALIZADO");
+            uartSendString(MENU_UART_STR_SET_TEMP_OFFSET_OK);
             stateEntry = true;
         }
         break;
@@ -311,10 +339,10 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("Offset Presion ");
+            LCD_Print(MENU_LCD_STR_OFFSET_PRESS);
             offset_ = sensor_.offsets.pressureOff;
             updateOffsetSelect(offset_, menu_.state_);
-            uartSendString((uint8_t *)"ENTRO EN OFFSET PRES\r\n");
+            uartSendString(MENU_UART_STR_OFFSET_PRESS);
             stateEntry = false;
         }        
         
@@ -334,6 +362,7 @@ void Menu_Update(void)
         if (btnPressed)
         {
             menu_.state_ = STATE_DISPLAY_DATA_TOP;
+            uartSendString(MENU_UART_STR_SET_PRESS_OFFSET_OK);
             sensor_.offsets.pressureOff = offset_;
             stateEntry = true;
         }
@@ -344,8 +373,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("Offset Humedad ");
-            uartSendString((uint8_t *)"ENTRO EN OFFSET HUM\r\n");
+            LCD_Print(MENU_LCD_STR_OFFSET_HUM);
+            uartSendString(MENU_UART_STR_OFFSET_HUM);
             offset_ = sensor_.offsets.humidityOff_x1024;
             updateOffsetSelect(offset_, menu_.state_);
             stateEntry = false;
@@ -367,6 +396,7 @@ void Menu_Update(void)
         if (btnPressed)
         {
             menu_.state_ = STATE_DISPLAY_DATA_TOP;
+            uartSendString(MENU_UART_STR_SET_HUM_OFFSET_OK);
             sensor_.offsets.humidityOff_x1024 = offset_;
             stateEntry = true;
         }
@@ -377,8 +407,8 @@ void Menu_Update(void)
         {
             LCD_Clear();
             LCD_SetCursor(LINE_1, 0);
-            LCD_Print("< Salir");
-            uartSendString((uint8_t *)"ENTRO EN SALIR\r\n");
+            LCD_Print(MENU_LCD_STR_EXIT);
+            uartSendString(MENU_UART_STR_EXIT);
             stateEntry = false;
         }
 
@@ -398,14 +428,6 @@ void Menu_Update(void)
     default:
         break;
     }
-}
-
-void BME280_ReadCorrected(BME280_t *b)
-{
-    if (BME280_ReadData(&b->data) != BME280_OK) return;
-    b->data.temperature_x100 += b->offsets.temperatureOff_x100;
-    b->data.pressure         += b->offsets.pressureOff;
-    b->data.humidity_x1024   += b->offsets.humidityOff_x1024;
 }
 
 static void updateDisplayData(BME280_Data_t *data)

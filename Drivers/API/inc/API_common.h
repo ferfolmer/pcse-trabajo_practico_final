@@ -1,19 +1,6 @@
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef API_COMMON_H
+#define API_COMMON_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <inttypes.h>
-#include "API_common_port.h"
-
-typedef uint32_t tick_t;
-typedef bool     bool_t;
-
-typedef struct
-{
-    port_t  port;
-    pin_t   pin;
-} gpio_t;
+#include "API_types.h"
 
 #endif

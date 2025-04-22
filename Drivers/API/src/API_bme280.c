@@ -114,6 +114,14 @@ BME280_Status_t BME280_ReadData(BME280_Data_t *out)
     return BME280_OK;
 }
 
+void BME280_ReadCorrected(BME280_t *b)
+{
+    if (BME280_ReadData(&b->data) != BME280_OK) return;
+    b->data.temperature_x100 += b->offsets.temperatureOff_x100;
+    b->data.pressure         += b->offsets.pressureOff;
+    b->data.humidity_x1024   += b->offsets.humidityOff_x1024;
+}
+
 
 /* ====================================================== */
 

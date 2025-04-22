@@ -1,11 +1,13 @@
 #include "API_debounce.h"
+#include "port.h"
+#include "port_gpio.h"
 
 static void Error_Handler(void);
 
 
 
 
-static const uint32_t debounceTime = 40U;
+static const uint32_t DEBOUNCE_TIME = 40U;
 
 
 
@@ -21,7 +23,7 @@ void debounceFSM_init(stDebounce *button, gpio_t *pin, delay_t *delay)
 	button->state_ = BUTTON_UP;
 	button->isButtonPressed_ = false;
 
-	delayInit(button->delay_, debounceTime);
+	delayInit(button->delay_, DEBOUNCE_TIME);
 
 	button->isInit = true;	
 }
@@ -38,7 +40,7 @@ void debounceFSM_update(stDebounce *button)
 	case BUTTON_UP:
 		if (buttonState == GPIO_PIN_RESET)
 		{
-			delayWrite(button->delay_, debounceTime);
+			delayWrite(button->delay_, DEBOUNCE_TIME);
 			button->state_ = BUTTON_FALLING;
 		}
 		break;
@@ -59,7 +61,7 @@ void debounceFSM_update(stDebounce *button)
 	case BUTTON_DOWN:
 		if (buttonState == GPIO_PIN_SET)		
 		{
-			delayWrite(button->delay_, debounceTime);
+			delayWrite(button->delay_, DEBOUNCE_TIME);
 			button->state_ = BUTTON_RAISING;
 		}
 		break;

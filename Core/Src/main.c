@@ -23,12 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "string.h"
-#include "API_i2c.h"
-#include "API_lcd.h"
-#include "API_bme280.h"
-#include "API_encoder.h"
-#include "API_uart.h"
+
 #include "menu.h"
 /* USER CODE END Includes */
 
@@ -97,11 +92,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-//  I2C_Init();
-  // uartInit();
-  // LCD_Init();
-  // BME280_Init();
-  // Encoder_Init();
+
   Menu_Init();
   /* USER CODE END 2 */
 
